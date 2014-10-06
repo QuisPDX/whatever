@@ -32,19 +32,19 @@ HTMLCanvasElement.prototype.relMouseCoords = function (event) {
 // ==============================
 
 var color1 = '#333333';
-var color2 = '#555555';
+var color2 = '#444444';
 var color3 = '#346a5b';
 var color4 = '#124839';
 
 var radius = Math.min(20, 0.4*(canvas.width)/11, 0.4*(canvas.height)/6);
+var coord_array = [];
+var c = 0;
+var saved_index = 0;
 var n_x = Math.floor(0.8*canvas.width/(2*radius));
 var n_y = Math.floor(0.8*canvas.height/(2*radius));
 var w = canvas.width;
 var h = canvas.height;
-var coord_array = []
-var c = 0
-var toggle = true
-var saved_index = 0
+
 
 function initalize_circles(){
   for (y = 0; y < n_y ; y++){
@@ -62,9 +62,9 @@ function initalize_circles(){
       coord_array[c] = y_nm_coord;          c++;      
       coord_array[c] = x_px_coord;          c++;
       coord_array[c] = y_px_coord;          c++;
-    }
-  }
-}
+    };
+  };
+};
 
 function reset_circles(){
   for (y = 0; y < n_y ; y++){
@@ -80,9 +80,9 @@ function reset_circles(){
       context.lineWidth = 2;
       context.strokeStyle = color2;
       context.stroke();
-    }
-  }
-}
+    };
+  };
+};
 
 function print_string_centered_here(x1,y1,text_string){
       context.beginPath();
@@ -90,12 +90,12 @@ function print_string_centered_here(x1,y1,text_string){
       context.fillStyle = 'white';
       context.textAlign = 'center';
       context.fillText(text_string, x1, y1 + 20/(2.62)); // make sure penultimate number is same as context.font
-      content.stroke()
-}
+      content.stroke();
+};
 
 function distance(x1, y1, x2, y2){
-  return Math.sqrt(Math.pow((x1-x2),2)+Math.pow((y1-y2),2))
-}
+  return Math.sqrt(Math.pow((x1-x2),2)+Math.pow((y1-y2),2));
+};
 
 // var foobar = 0
 function toggle_currently_selected(old_index, cur_index){ 
@@ -104,18 +104,18 @@ function toggle_currently_selected(old_index, cur_index){
     coord_array[6*cur_index] = 1; //turn on new index
   } else {
     coord_array[6*cur_index] = (coord_array[6*cur_index] == 1) ? 0 : 1; //toggle old index
-  }
+  };
   saved_index = cur_index;
   // context.fillText(coord_array[6*old_index], 10+160*foobar, 10);
   // context.fillText(coord_array[6*cur_index], 40+160*foobar, 10);
   // context.fillText(old_index, 70+160*foobar, 10);
   // context.fillText(cur_index, 100+160*foobar, 10);
   // foobar++;
-}
+};
 
 function update_state(i){
   coord_array[6*i+1] = (coord_array[6*i+1] + 1) % 5;
-}
+};
 
 function color_based_on_state(i, x1, y1){
   context.beginPath();
@@ -130,13 +130,13 @@ function color_based_on_state(i, x1, y1){
     context.fill();
     context.lineWidth = 2;
     context.strokeStyle = color4;
-    print_string_centered_here(x1,y1,coord_array[6*i+1])    
-  }
+    print_string_centered_here(x1,y1,coord_array[6*i+1])
+  };
   context.stroke();
-}
+};
 
 function color_circle_under_cursor(){
-  for (var i = 0; i < (coord_array.length)/6; i++) {    
+  for (var i = 0; i < (coord_array.length)/6; i++) {
     coords = canvas.relMouseCoords(event);
     canvasX = coords.x;
     canvasY = coords.y;
@@ -147,13 +147,33 @@ function color_circle_under_cursor(){
       update_state(i);
       color_based_on_state(i, x_one, y_one);
       return
-    }
-  }
-}
+    };
+  };
+};
+
+function print_non_zeros(){
+  var count = 0;
+  for (var i = 0; i < (coord_array.length)/6; i++) {
+    if (coord_array[6*i+1] != 0){
+      count++;
+    };
+  };
+  context.beginPath();
+  context.arc(coord_array[4],coord_array[5], radius, 0, 2 * 3.1415);
+  context.fillStyle = color1;
+  context.fill();
+  context.lineWidth = 2;
+  context.strokeStyle = color2;
+  context.stroke();
+  print_string_centered_here(coord_array[4],coord_array[5],count);
+};
+
 
 function click_function(){
   color_circle_under_cursor();
-}
+  print_non_zeros(); // Does not always print
+  return false;
+};
 
 initalize_circles(); // creates array
 reset_circles();     // draws circless
