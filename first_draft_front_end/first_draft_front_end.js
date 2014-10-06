@@ -85,12 +85,10 @@ function reset_circles(){
 };
 
 function print_string_centered_here(x1,y1,text_string){
-      context.beginPath();
       context.font = '20px Helvetica'; 
       context.fillStyle = 'white';
       context.textAlign = 'center';
       context.fillText(text_string, x1, y1 + 20/(2.62)); // make sure penultimate number is same as context.font
-      content.stroke();
 };
 
 function distance(x1, y1, x2, y2){
@@ -114,7 +112,7 @@ function toggle_currently_selected(old_index, cur_index){
 };
 
 function update_state(i){
-  coord_array[6*i+1] = (coord_array[6*i+1] + 1) % 5;
+  coord_array[6*i+1] = (coord_array[6*i+1] + 1) % 4;
 };
 
 function color_based_on_state(i, x1, y1){
@@ -171,7 +169,8 @@ function print_non_zeros(){
 
 function click_function(){
   color_circle_under_cursor();
-  print_non_zeros(); // Does not always print
+  print_non_zeros();
+ // Does not always print
   return false;
 };
 
