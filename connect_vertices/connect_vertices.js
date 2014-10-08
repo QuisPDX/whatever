@@ -29,12 +29,18 @@ HTMLCanvasElement.prototype.relMouseCoords = function (event) {
     return {x:canvasX, y:canvasY}
 }
 
-// ==============================
+// http://stackoverflow.com/questions/8301400/how-do-you-easily-create-empty-matrices-javascript
+function n_by_n_zero_matrix(n){
+  var matrix = [];
+  for(i2=0; i2 < n; i2++) {
+    matrix[i2] = [];
+    for(j2=0; j2 < n; j2++) {
+      matrix[i2][j2] = 0;
+    }
+  }
+  return matrix}
 
-var color1 = '#333333';
-var color2 = '#444444';
-var color3 = '#346a5b';
-var color4 = '#124839';
+var color1 = '#333333'; var color2 = '#444444'; var color3 = '#346a5b'; var color4 = '#124839';
 
 var radius = Math.min(20, 0.4*(canvas.width)/11, 0.4*(canvas.height)/6);
 var j = [];
@@ -71,17 +77,17 @@ function initalize_j(){
 
 function reset_circles(){
   context.canvas.width = context.canvas.width;
-  for (b = 0; b < max_b ; b++){
-    for (a = 0; a < max_a ; a++) { 
-      color_based_on_state(j[r_index(a,b)+1], atox[a], btoy[b])
+  for (b = 1; b < max_b ; b++){
+    for (a = 0; a < max_a ; a++) {
+      color_based_on_state(j[r_index(a,b)+1], a, b);
     }
   }}
 
-function print_string_centered_here(x1,y1,text_string){
-      context.font = '20px Helvetica'; 
-      context.fillStyle = 'white';
-      context.textAlign = 'center';
-      context.fillText(text_string, x1, y1 + 20/(2.62));} // make sure penultimate number is same as context.font
+function print_string_centered_here(a1,b1,text_string){
+  context.font = '20px Helvetica'; 
+  context.fillStyle = 'white';
+  context.textAlign = 'center';
+  context.fillText(text_string, atox[a1], btoy[b1] + 20/(2.62));} // make sure penultimate number is same as context.font
 
 function distance(x1, y1, x2, y2){return Math.sqrt(Math.pow((x1-x2),2)+Math.pow((y1-y2),2));}
 
@@ -96,9 +102,9 @@ function toggle_currently_selected(old_index, cur_index){
 
 function update_state(i){j[4*i+1] = (j[4*i+1] + 1) % (max_vertex+1);}
 
-function color_based_on_state(state, x1, y1){
+function color_based_on_state(state, a1, b1){
   context.beginPath();
-  context.arc(x1, y1, radius, 0, 2 * 3.1415);
+  context.arc(atox[a1], btoy[b1], radius, 0, 2 * 3.1415);
   if (state == 0){
     context.fillStyle = color1;
     context.fill();
@@ -109,12 +115,12 @@ function color_based_on_state(state, x1, y1){
     context.fill();
     context.lineWidth = 2;
     context.strokeStyle = color4;
-    print_string_centered_here(x1, y1, state);
+    print_string_centered_here(a1, b1, state);
   }
   context.stroke();}
 
 function color_circle_under_cursor(){
-  for (i = 0; i < (j.length)/4; i++) {
+  for (i = max_a; i < (j.length)/4; i++) {
     coords = canvas.relMouseCoords(event);
     canvasX = coords.x;
     canvasY = coords.y;
@@ -123,12 +129,12 @@ function color_circle_under_cursor(){
     if (distance(x1, y1, canvasX, canvasY) < radius){ // There is a much faster way of doing this: find a then find b
       toggle_currently_selected(saved_index, i);
       update_state(i);
-      color_based_on_state(j[4*i+1], x1, y1);
+      color_based_on_state(j[4*i+1], j[4*i + 2], j[4*i + 3]);
       return
     }
   }}
 
-function print_non_zeros(){
+function number_of_vertices(){
   var count = 0;
   for (var i = 0; i < (j.length)/4; i++) {
     if (j[4*i+1] != 0){
@@ -142,11 +148,11 @@ function print_non_zeros(){
   context.lineWidth = 2;
   context.strokeStyle = color2;
   context.stroke();
-  print_string_centered_here(atox[j[2]],btoy[j[3]],count);}
+  print_string_centered_here(j[2],j[3],count);}
 
 function draw_line(a1, b1, a2, b2){
   context.beginPath();
-  if(a1==a2){
+  if(a1 == a2){
     x1 = atox[a1]
     x2 = atox[a2]
     y1 = btoy[Math.min(b1,b2)]+radius+2
@@ -160,7 +166,9 @@ function draw_line(a1, b1, a2, b2){
   context.moveTo(x1, y1);
   context.lineTo(x2, y2);
   context.lineWidth = 5;
+  if (j[r_index(a1,b1)+1] != j[r_index(a2,b2)+1]){
   context.strokeStyle = 'white';
+  }else{context.strokeStyle = color1;}
   context.stroke();}
 
 function r_index(a,b){return 4*(max_a*b + a)}
@@ -198,17 +206,6 @@ function draw_all_lines(){
     }
   } }
 
-// http://stackoverflow.com/questions/8301400/how-do-you-easily-create-empty-matrices-javascript
-function n_by_n_zero_matrix(n){
-  var matrix = [];
-  for(i2=0; i2 < n; i2++) {
-    matrix[i2] = [];
-    for(j2=0; j2 < n; j2++) {
-      matrix[i2][j2] = 0;
-    }
-  }
-  return matrix}
-
 function i_touches_j(i,j,matrix){
   if (i==0 || j == 0){return}
   matrix[i-1][j-1] = 1;
@@ -233,25 +230,39 @@ function largest_full_submatrix(matrix){
       }
     }
   }
-  return matrix.length
+  return matrix.length}
+
+function proximityscore(){
+  print_string_centered_here(1, 0, largest_full_submatrix(proximity_matrix))
 }
 
 function click_function(){
   proximity_matrix = n_by_n_zero_matrix(max_vertex)
   reset_circles();
   color_circle_under_cursor();
-  print_non_zeros();
+  number_of_vertices();
   draw_all_lines(); 
-  print_string_in_second_circle(largest_full_submatrix(proximity_matrix));
+  proximityscore();
+  print_string_centered_here(max_a-1, 0, "-");
+  print_string_centered_here(max_a-2, 0, max_vertex);
+  print_string_centered_here(max_a-3, 0, "+");
 }
 
-function print_string_in_second_circle(text_string){
+function print_string_in_last_circle(text_string){
       context.font = '20px Helvetica'; 
       context.fillStyle = 'white';
       context.textAlign = 'center';
-      context.fillText(text_string, atox[1], btoy[0] + 20/(2.62));}
+      context.fillText(text_string, atox[max_a-2], btoy[0] + 20/(2.62));}
 
+function initialize_everything(){
 initialize_atox_and_btoy();
 initalize_j(); // creates array
 reset_circles(); // draws circles
-print_string_in_second_circle(sum_matrix());
+number_of_vertices();
+print_string_centered_here(1, 0, 0);
+print_string_centered_here(max_a-1, 0, "-");
+print_string_centered_here(max_a-2, 0, max_vertex);
+print_string_centered_here(max_a-3, 0, "+");
+}
+
+initialize_everything()
